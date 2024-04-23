@@ -1,0 +1,7 @@
+{
+  "name": "progomex-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
