@@ -34,11 +34,74 @@
             </ion-item>
           </ion-col>
           <ion-col class="alineando">
-            <ion-button style="margin-left:40px">Generar Reporte</ion-button>
+            <ion-button shape="round" style="margin-left:40px">
+              <ion-icon name="download"></ion-icon>
+              
+              Generar Reporte</ion-button>
           </ion-col>
+        </ion-row>
+        <ion-row>
+          <div *ngIf="chartOptions && chartOptions.data && chartOptions.data.length > 0">
+            <canvasjs-chart style="align-items: center;" id = "myChart"[options]="chartOptions" [styles]="{ width: '100%', height:'300px'}"></canvasjs-chart>
+          </div> 
         </ion-row>
       </ion-grid>
 
+      <div class="split-screen">
+        <div class="left-panel">
+          <ion-list *ngIf="selectedMonth">
+            <ion-card *ngFor="let week of selectedMonth.weeks" (click)="selectWeek(week)" >
+              <ion-card-content>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <ion-label>{{ week.name }}</ion-label>
+                    <br>
+                    <ion-note>Del {{ week.startDate }} al {{ week.endDate }}</ion-note>
+                  </div>
+                  <ion-icon name="download" ></ion-icon>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-list>
+        </div>
+
+
+       <!-- Contenedor para las ventas de la semana seleccionada -->
+    <div class="right-panel" *ngIf="selectedWeek">
+      <!-- Lista de ventas -->
+      <ion-card class="cardVentas">
+        <ion-list >
+          <ion-list-header>
+            Ventas de la semana {{ selectedWeek.name }}
+
+          </ion-list-header>
+          <ion-card *ngFor="let venta of ventas; let i = index" (click)="selectVenta(venta)">
+            <ion-card-content>
+              <ion-label>
+                    Venta #{{i+1}} Total: {{venta.totalPagar | currency}}
+              </ion-label>
+            </ion-card-content>
+          </ion-card>
+        </ion-list>
+        <!-- Mensaje si no hay ventas -->
+        <div *ngIf="ventas.length === 0">
+          <ion-card>
+            <ion-card-content>
+              <p>Ventas de la  {{selectedWeek.name}}</p>
+            <p>No hay ventas para mostrar en esta semana.</p>
+            </ion-card-content>
+          </ion-card>
+
+          
+        </div>
+      </ion-card>
+      
+    </div>
+      
+      </div>
+      
     </ion-card-content>
   </ion-card>
+
+
 </ion-content>

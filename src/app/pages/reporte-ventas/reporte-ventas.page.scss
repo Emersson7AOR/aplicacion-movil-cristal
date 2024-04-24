@@ -16,3 +16,22 @@ ion-select{
     text-align: right;
     margin-top: 20px; 
   }
+
+  ancho-card {
+    width: flex; /* Asegura que no exceda el ancho del contenedor */
+    height: flex;
+    position: -webkit-sticky; /* Para soporte en Safari */
+    position: sticky;
+    top: 0; /* Ajusta según sea necesario */
+    z-index: 1000; /* Asegura que la cabecera se muestre sobre otros contenidos */
+}
+.split-screen {
+    display: flex;
+  }
+  
+  .left-panel, .right-panel {
+    flex: 1; /* Hace que cada panel tome la mitad del espacio disponible */
+    overflow-y: auto;
+    
+  }
+ 

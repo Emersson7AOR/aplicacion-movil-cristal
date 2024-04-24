@@ -1,9 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonLabel, IonItem, IonSelect, IonSelectOption, IonHeader, IonCard, IonGrid, IonRow, IonCardContent, IonCardHeader, IonTitle, IonToolbar, IonCardSubtitle, IonCardTitle, IonCol, IonButton } from '@ionic/angular/standalone';
+import { IonContent, IonLabel, IonItem, IonSelect, IonSelectOption, IonHeader, IonCard, IonGrid, IonRow, IonCardContent, IonCardHeader, IonTitle, IonToolbar, IonCardSubtitle, IonCardTitle, IonCol, IonButton, IonIcon, IonList, IonNote, IonListHeader } from '@ionic/angular/standalone';
 import { DetalleProducto, Grafica, GraficaProductosService } from 'src/app/services/producto/grafica-productos.service';
 import { Venta, VentasService } from 'src/app/services/ventas/ventas.service';
+import { CanvasJSAngularChartsModule } from '@canvasjs/angular-charts';
 
 
 interface Week {
@@ -22,7 +23,7 @@ interface Month {
   templateUrl: './reporte-ventas.page.html',
   styleUrls: ['./reporte-ventas.page.scss'],
   standalone: true,
-  imports: [IonButton, IonLabel, IonCol,  IonItem, IonSelect, IonSelectOption, IonCardTitle, IonGrid, IonRow, IonCardSubtitle, IonCardContent, IonCardHeader, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonCard]
+  imports: [IonListHeader, IonNote, IonList, IonIcon, CanvasJSAngularChartsModule, IonButton, IonLabel, IonCol,  IonItem, IonSelect, IonSelectOption, IonCardTitle, IonGrid, IonRow, IonCardSubtitle, IonCardContent, IonCardHeader, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonCard]
 })
 export class ReporteVentasPage implements OnInit {
 
@@ -136,16 +137,13 @@ export class ReporteVentasPage implements OnInit {
   //SELECCIONA LOS MESES, Y CO  EL SERVICE PASAN EL AÑO Y MES AL APICITA
 
    // Al cambiar el mes, se selecciona el mes y se calculan las fechas de inicio y fin del mes seleccionado
-   onMonthChange(event: any = {}) {
+   onMonthChange(event: any) {
     // Asumir el mes actual si no se provee un evento con valor por medio de un objeto de tipo date y la funcion getMonth
     const currentMonth = new Date().getMonth();
   
     // Encuentra y selecciona el mes basado en el nombre del mes
-    this.selectedMonth = this.months.find((month) => month.name === event.value);
-    if (!this.selectedMonth) {
-      // Si por alguna razón no se encuentra el mes, usar el mes actual como fallback
-      this.selectedMonth = this.months[currentMonth];
-    }
+    this.selectedMonth = this.months.find((month) => month.name === event.detail.value);
+   
     this.selectedWeek = null; // Limpiar la semana seleccionada al cambiar el mes
   
     const year = this.selectedYear;
@@ -280,6 +278,11 @@ export class ReporteVentasPage implements OnInit {
   }
   capitalizeMonthName(monthName: string): string {
     return monthName.charAt(0).toUpperCase() + monthName.slice(1).toLowerCase();
+  }
+
+   //PARA ABRIR MI MODAL DE LOS DETALLES
+   async selectVenta(venta : Venta){
+    
   }
 
   crearGrafica(productos: string[], cantidades: number[]) {
