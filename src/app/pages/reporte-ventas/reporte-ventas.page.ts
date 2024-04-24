@@ -133,7 +133,6 @@ export class ReporteVentasPage implements OnInit {
     }
   }
 
-  
   //SELECCIONA LOS MESES, Y CO  EL SERVICE PASAN EL AÑO Y MES AL APICITA
 
    // Al cambiar el mes, se selecciona el mes y se calculan las fechas de inicio y fin del mes seleccionado
@@ -147,7 +146,7 @@ export class ReporteVentasPage implements OnInit {
     this.selectedWeek = null; // Limpiar la semana seleccionada al cambiar el mes
   
     const year = this.selectedYear;
-    const monthIndex = this.months.findIndex((month) => month.name === event.value);
+    const monthIndex = this.months.findIndex((month) => month.name === event.detail.value);
   
     // Calcula la fecha de inicio y fin para el mes seleccionado
     const startDate = new Date(year, monthIndex, 1);
@@ -299,16 +298,17 @@ export class ReporteVentasPage implements OnInit {
         title: {
           text: "Productos más vendidos",
           fontFamily: "Arial",
-          fontSize : 20
+          fontSize : 10
         },
         axisY: {
           title: "Unidades Vendidas",
           fontFamily: "Arial",
-          fontSize : 15
+          fontSize : 8
         },
         data: [{
           type: "splineArea",
           color: "rgba(54,158,173,.7)",
+          fontSize : 8,
           dataPoints: dataPoints
         }]
       };

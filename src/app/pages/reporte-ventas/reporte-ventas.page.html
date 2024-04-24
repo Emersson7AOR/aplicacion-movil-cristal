@@ -33,16 +33,23 @@
               </ion-select>
             </ion-item>
           </ion-col>
-          <ion-col class="alineando">
-            <ion-button shape="round" style="margin-left:40px">
-              <ion-icon name="download"></ion-icon>
-              
-              Generar Reporte</ion-button>
-          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="selectedMonth">
+          
+              <ion-grid>
+                <ion-row class="ion-align-items-center ion-justify-content-center">
+                  <ion-col size="auto">
+                    <h1>{{ selectedMonth.name }}</h1>
+                  </ion-col>
+                  <ion-col class="alineando" size="auto">
+                    <ion-button  shape="round">Generar Reporte</ion-button>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
         </ion-row>
         <ion-row>
           <div *ngIf="chartOptions && chartOptions.data && chartOptions.data.length > 0">
-            <canvasjs-chart style="align-items: center;" id = "myChart"[options]="chartOptions" [styles]="{ width: '100%', height:'300px'}"></canvasjs-chart>
+            <canvasjs-chart style="align-items: center;" id = "myChart"[options]="chartOptions" [styles]="{ width: '350px', height:'300px'}"></canvasjs-chart>
           </div> 
         </ion-row>
       </ion-grid>
