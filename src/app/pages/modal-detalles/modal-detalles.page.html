@@ -1,0 +1,25 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Modal</ion-title>
+    <ion-buttons slot="start">
+      <ion-button color="medium" (click)="cancel()">Cancel</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-list-header>
+      Detalles de la Venta
+    </ion-list-header>
+    <ion-item *ngFor="let detalle of venta?.detalles">
+      <ion-label>
+        <h2>{{ detalle.producto?.nombreProducto }}</h2>
+        <p>Cantidad: {{ detalle.cantidadProductos }}</p>
+        <p>Precio unitario: ${{ detalle.producto?.precio | number:'1.2-2' }}</p>
+        <p>Subtotal: ${{ detalle.subTotal | number:'1.2-2' }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
+

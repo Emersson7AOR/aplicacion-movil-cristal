@@ -1,10 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonLabel, IonItem, IonSelect, IonSelectOption, IonHeader, IonCard, IonGrid, IonRow, IonCardContent, IonCardHeader, IonTitle, IonToolbar, IonCardSubtitle, IonCardTitle, IonCol, IonButton, IonIcon, IonList, IonNote, IonListHeader } from '@ionic/angular/standalone';
+import { IonicModule, ModalController, ToastController } from '@ionic/angular';
 import { DetalleProducto, Grafica, GraficaProductosService } from 'src/app/services/producto/grafica-productos.service';
 import { Venta, VentasService } from 'src/app/services/ventas/ventas.service';
 import { CanvasJSAngularChartsModule } from '@canvasjs/angular-charts';
+import { ModalDetallesPage } from '../modal-detalles/modal-detalles.page';
 
 
 interface Week {
@@ -23,7 +24,8 @@ interface Month {
   templateUrl: './reporte-ventas.page.html',
   styleUrls: ['./reporte-ventas.page.scss'],
   standalone: true,
-  imports: [IonListHeader, IonNote, IonList, IonIcon, CanvasJSAngularChartsModule, IonButton, IonLabel, IonCol,  IonItem, IonSelect, IonSelectOption, IonCardTitle, IonGrid, IonRow, IonCardSubtitle, IonCardContent, IonCardHeader, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonCard]
+  imports: [IonicModule, CanvasJSAngularChartsModule,
+     CommonModule, FormsModule]
 })
 export class ReporteVentasPage implements OnInit {
 
@@ -40,7 +42,7 @@ export class ReporteVentasPage implements OnInit {
   private readonly graficaProductosService = inject(GraficaProductosService);
 
   
-  constructor() {
+  constructor(private modalController: ModalController) {
     const currentDate = new Date();
     this.selectedYear = currentDate.getFullYear(); // Establece el año actual como predeterminado
     this.generateYears();
@@ -281,7 +283,13 @@ export class ReporteVentasPage implements OnInit {
 
    //PARA ABRIR MI MODAL DE LOS DETALLES
    async selectVenta(venta : Venta){
-    
+    const modal = await this.modalController.create({
+      component: ModalDetallesPage,
+      componentProps: {
+        venta: venta
+      }
+    });
+    return await modal.present();
   }
 
   crearGrafica(productos: string[], cantidades: number[]) {
