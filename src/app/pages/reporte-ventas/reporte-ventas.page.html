@@ -10,4 +10,35 @@
       <ion-title size="large">reporte-ventas</ion-title>
     </ion-toolbar>
   </ion-header>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Reporte de ventas</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row class="ion-align-items-center ion-justify-content-center">
+          <ion-col >
+            <ion-item>
+              
+              <ion-select label="Selecciona un año" label-placement="floating" placeholder="Selecciona un año" [value]="selectedYear" (ionChange)="onYearChange($event)">
+                <ion-select-option *ngFor="let year of years" [value]="year">{{year}}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+          <ion-col>
+            <ion-item>
+              <ion-select label="Selecciona un mes" label-placement="floating" placeholder="Selecciona un mes" (ionChange)="onMonthChange($event)">
+                <ion-select-option *ngFor="let month of months" [value]="month.name">{{month.name}}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+          <ion-col class="alineando">
+            <ion-button style="margin-left:40px">Generar Reporte</ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+    </ion-card-content>
+  </ion-card>
 </ion-content>
