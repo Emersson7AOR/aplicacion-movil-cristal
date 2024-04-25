@@ -1,9 +1,14 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ToastController } from '@ionic/angular';
+import { ModalController, Platform } from '@ionic/angular';
 import { DetalleProducto, Grafica, GraficaProductosService } from 'src/app/services/producto/grafica-productos.service';
 import { Venta, VentasService } from 'src/app/services/ventas/ventas.service';
+//Para crear el pdf
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { Browser } from '@capacitor/browser';
+
 import { CanvasJSAngularChartsModule } from '@canvasjs/angular-charts';
 import { ModalDetallesPage } from '../modal-detalles/modal-detalles.page';
 import {
@@ -12,8 +17,9 @@ import {
   IonHeader, IonContent, IonGrid, IonNote,
   IonCol, IonRow, IonSelect, IonSelectOption,
   IonIcon, IonItem, IonTitle, IonButton, IonList,
-  IonLabel,
+  IonLabel, IonModal
 } from "@ionic/angular/standalone";
+
 
 
 interface Week {
@@ -40,10 +46,13 @@ interface Month {
      IonHeader, IonContent, IonGrid, IonNote,
      IonCol, IonRow, IonSelect, IonSelectOption,
      IonIcon, IonItem, IonTitle, IonButton,
-     IonList, IonLabel,
-    ]
+     IonList, IonLabel, IonModal
+    ],
+    providers: [ModalController] // Provee ModalController aquí
+
 })
 export class ReporteVentasPage implements OnInit {
+  private graficaImagenUrl: string | undefined;
 
   chartOptions: any;
   ventas : Venta[] = [];
@@ -58,7 +67,10 @@ export class ReporteVentasPage implements OnInit {
   private readonly graficaProductosService = inject(GraficaProductosService);
 
 
-  constructor(/* private modalController: ModalController */) {
+  constructor(private modalCtrl: ModalController,
+    //clase que nos ayuda a identificar el tipo de plataforma que es si movil o web, para descargar la imagen
+    private platform : Platform
+  ) {
     const currentDate = new Date();
     this.selectedYear = currentDate.getFullYear(); // Establece el año actual como predeterminado
     this.generateYears();
@@ -297,16 +309,16 @@ export class ReporteVentasPage implements OnInit {
     return monthName.charAt(0).toUpperCase() + monthName.slice(1).toLowerCase();
   }
 
-   //PARA ABRIR MI MODAL DE LOS DETALLES
-  //  async selectVenta(venta : Venta){
-  //   const modal = await this.modalController.create({
-  //     component: ModalDetallesPage,
-  //     componentProps: {
-  //       venta: venta
-  //     }
-  //   });
-  //   return await modal.present();
-  // }
+  //PARA ABRIR MI MODAL DE LOS DETALLES
+  async selectVenta(venta: Venta) {
+    const modal = await this.modalCtrl.create({
+      component: ModalDetallesPage,
+      componentProps: {
+        venta: venta
+      }
+    });
+    return await modal.present();
+  }
 
   crearGrafica(productos: string[], cantidades: number[]) {
     let dataPoints = productos.map((producto, index) => ({
@@ -322,7 +334,7 @@ export class ReporteVentasPage implements OnInit {
         title: {
           text: "Productos más vendidos",
           fontFamily: "Arial",
-          fontSize : 10
+          fontSize : 13
         },
         axisY: {
           title: "Unidades Vendidas",
@@ -337,9 +349,330 @@ export class ReporteVentasPage implements OnInit {
         }]
       };
       setTimeout(() => {
-          //aqui se convierte la grafica a base 64
+        this.convertirGraficaABase64();
       }, 3000);
     });
 
     }
+
+    convertirGraficaABase64() {
+      // AQUI ACCEDEMOS AL ELEMENTO CANVAS POR MEDIO DEL ID 
+      const chartContainer = document.getElementById('myChart'); 
+      if (chartContainer) {
+        const canvas = chartContainer.getElementsByTagName('canvas')[0];
+        if (canvas) {
+          const imagenBase64 = canvas.toDataURL("image/png");
+          this.graficaImagenUrl = imagenBase64;
+          console.log(this.graficaImagenUrl);
+        }
+      }
+    } 
+
+    //GENERAR REPORTE MENSUAL
+   async generarReporteMensual() {
+    const doc = new jsPDF();
+    const margen = 15; // 2.5 cm en milímetros
+    let paginaAncho = doc.internal.pageSize.getWidth();
+  
+    const logoEmpresa = '/assets/progomex.jpg';
+    const logoAncho = 30; 
+    const logoAlto = 30; 
+  
+    //AQUI ESTOY AÑADIENDO LA IMAGEN EN EL PDF A LA IZQUIERDA
+    doc.addImage(logoEmpresa, 'JPEG', margen, 20, logoAncho, logoAlto); 
+  
+    doc.setFont("helvetica", "bold");   
+    doc.setFontSize(9); 
+    const elementosEncabezado = [
+      "Productora y Maquila de Gomas Resinas de Mexico S. de R.L",
+      "Carretera estatal la capilla el huasteco km.18 la Guadalupe Ver.",
+      "271-219-42-031",
+      "PMG110202LL5"
+    ];
+    
+    let yEncabezado = 25; 
+  
+    elementosEncabezado.forEach((elemento) => {
+      const xElemento = (paginaAncho - doc.getTextWidth(elemento)) / 2; 
+      doc.text(elemento, xElemento, yEncabezado);
+      yEncabezado += 7; 
+    });
+      
+    //AGREGANDO UNA LINEA
+     doc.setDrawColor(0);//aqui le puedo dar el color
+     doc.setLineWidth(0.1); //esta es la funcion para darle grosor a la linea
+     //si quiero poner la linea mas separada solo lo pongo yEncabezado + 3 o 1 o 2
+     doc.line(15, yEncabezado , paginaAncho - 15, yEncabezado);
+   
+      // propiedades para el título del reporte 
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16); // Tamaño de fuente para el título
+      const titulo = `Reporte de ventas del mes de: ${this.selectedMonth.name}`;
+      const xTitulo = (paginaAncho - doc.getTextWidth(titulo)) / 2;
+      doc.text(titulo, xTitulo, 61); // Para centrar el título en la página completa
+      // línea después del título
+      doc.line(15, yEncabezado + 12, paginaAncho - 15, yEncabezado + 12);
+    
+      //AGREGANDO LA GRAFICA AL REPORTE
+      //le agrrego las propiedades de ancho y alto, asi como el centrado
+      const imagenAncho = 140; 
+        const imagenAlto = 80; 
+        const xImagen = (paginaAncho - imagenAncho) / 2; 
+        const yImagen = yEncabezado + 20; 
+        
+      if (this.graficaImagenUrl) {
+        doc.addImage(this.graficaImagenUrl, 'PNG', xImagen, yImagen, imagenAncho, imagenAlto);
+        let inicioInformacionVentas = yImagen + imagenAlto + 10; 
+        paginaAncho = inicioInformacionVentas;
+      
+      }
+  
+      let yPosition = yEncabezado + 20 + imagenAlto + 20; 
+  
+     this.ventasM.forEach((ventaM, index) => {
+      // Verificar si es necesario añadir una nueva página
+      if (yPosition > (doc.internal.pageSize.height - 25)) {
+        // No hay suficiente espacio, entonces agrego una nueva página
+        doc.addPage();
+        yPosition = 25; // Restablece la posición Y para el inicio de la nueva página
+      }
+      doc.setFontSize(10);
+       // Encabezado de cada venta
+       //OBETENER LA FECHA EN YYYY-MM-DD
+        const fechaHoraISO = ventaM.fechaVenta.toString();
+        
+        // Ahora uso un split ya que fechaHoraISO es una cadena:
+        const partes = fechaHoraISO.split('T');
+        const fecha = partes[0];const horaCompleta = partes[1].split(':');
+        const hora = `${horaCompleta[0]}:${horaCompleta[1]}`; // Formato HH:MM
+  
+       doc.setFont("helvetica", "bold");  
+       doc.text(`Venta nº: ${index+1}     Fecha: ${fecha}     Hora: ${hora}`, 15, paginaAncho);
+      
+       // Calculando el ancho del texto "Total de Venta"
+       const totalVentaTexto = `Total de venta: $ ${ventaM.totalPagar}.00`;
+       const totalVentaAncho = doc.getTextWidth(totalVentaTexto);
+       
+       // Calculando la posición x para alinear a la derecha
+       const margenDerecho = 15; // Por ejemplo, 10 mm de margen derecho
+       const paginaAncho2 = doc.internal.pageSize.getWidth();
+       const xTotalVenta = paginaAncho2 - totalVentaAncho - margenDerecho;
+       
+       // Posicionando "Total de Venta" a la derecha y al mismo nivel de "Venta ID"
+       
+       doc.setFont("helvetica", "bold");
+       doc.text(totalVentaTexto, xTotalVenta, paginaAncho);;
+        
+       //NOMBRE DEL EMPLEADO
+       paginaAncho += 6;
+       const nombreCompletoEmpleado = `${ventaM.empleado?.nombreEmpleado} ${ventaM.empleado?.apellidoPaterno} ${ventaM.empleado?.apellidoMaterno}`;
+       doc.setFont("helvetica", "normal");
+       doc.text(`Empleado: ${nombreCompletoEmpleado}`, 15, paginaAncho);
+  
+       //NOMBRE DEL CLIENTE
+       paginaAncho += 6; // Espacio despues del nombre del empleado
+       const nombreCompletoCliente = `${ventaM.cliente?.nombreCliente} ${ventaM.cliente?.apellidoPaterno} ${ventaM.cliente?.apellidoMaterno}`;
+       doc.setFont("helvetica", "normal");
+       doc.text(`Cliente: ${nombreCompletoCliente}`, 15, paginaAncho);
+  
+       paginaAncho += 6; // Espacio después del nombre del cliente
+          
+        // Datos para la tabla de detalles
+        const detallesColumn = ["Clave","Producto", "Cantidad", "Precio", "Subtotal"];
+        const detallesRows = ventaM.detalles.map(detalle => [
+          detalle.producto?.clave || 'N/A', 
+          detalle.producto?.nombreProducto || 'N/A', // 'N/A' como valor por defecto
+          detalle.cantidadProductos || 0,
+          detalle.producto?.precio || 0,
+          detalle.subTotal || 0,
+        ]);
+  
+        // Añadir tabla de detalles al documento
+        autoTable(doc, {
+          head: [detallesColumn],
+          body: detallesRows,
+          startY: paginaAncho,
+          headStyles: {
+            fillColor: [25, 110, 167], // Color verde en formato RGB 
+            fontStyle: 'bold' // Estilo de fuente en negrita
+          },
+          bodyStyles: { 
+          },
+          didDrawPage: function(data) {
+            if (data.cursor) {
+              paginaAncho = data.cursor.y + 10; 
+            }
+          }
+        });
+  
+     });
+    
+      if (this.platform.is('capacitor')) { //si es movil
+          // Generar el blob y la URL del blob
+        const pdfOutput = doc.output('blob');
+        const blobURL = URL.createObjectURL(pdfOutput);
+      
+        // Abrir el PDF usando el Browser de Capacitor
+        await Browser.open({ url: blobURL });
+      } else {//si es web
+        // Guardar el PDF ESCRITORIO
+        doc.save(`reporte_ventas_${this.selectedMonth.name}.pdf`);
+        //ABRIR EL PDF EN EL NAVEGADOR 
+        //lo estoy abriendo despues de un segundo para esperar a que se ejecute mi alert
+        setTimeout(function () {
+          window.open(doc.output('bloburl'), '_blank');
+        }, 1000);
+      }
+
+   
+  }
+
+//GENERAR REPORTE SEMANAL
+  generarReporteSemanal() {
+    const doc = new jsPDF();
+    const margen = 15; 
+    let paginaAncho = doc.internal.pageSize.getWidth();
+    
+    // Agregando el logo de la empresa
+    const logoEmpresa = '/assets/progomex.jpg';
+    const logoAncho = 30; 
+    const logoAlto = 30; 
+  
+    // Añadir imagen: logo de la empresa alineado a la izquierda
+    doc.addImage(logoEmpresa, 'JPEG', margen, 20, logoAncho, logoAlto); 
+  
+    //FUENTES PARA EL ENCABEZADO
+    doc.setFont("helvetica", "bold"); 
+    doc.setFontSize(9); 
+    const elementosEncabezado = [
+      "Productora y Maquila de Gomas Resinas de Mexico S. de R.L",
+      "Carretera estatal la capilla el huasteco km.18 la Guadalupe Ver.",
+      "271-219-42-031",
+      "PMG110202LL5"
+    ];
+    
+    let yEncabezado = 25; 
+  
+    elementosEncabezado.forEach((elemento) => {
+      const xElemento = (paginaAncho - doc.getTextWidth(elemento)) / 2; 
+      doc.text(elemento, xElemento, yEncabezado);
+      yEncabezado += 7; // Añadir espacio vertical para la siguiente línea
+    });
+    
+     // AÑADIENDO UNA LINEA ANTES DEL TITULO
+     doc.setDrawColor(0);
+     doc.setLineWidth(0.1);
+     //si quiero ponerlo mas separado solo lo pongo yEncabezado + 3 o 1 o 2
+     doc.line(15, yEncabezado , paginaAncho - 15, yEncabezado);
+   
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16); 
+      const titulo = `Reporte de ventas de: ${this.selectedWeek.name}`;
+      const xTitulo = (paginaAncho - doc.getTextWidth(titulo)) / 2;
+      doc.text(titulo, xTitulo, 61); 
+      // Añadir una línea después del títulO
+      doc.line(15, yEncabezado + 12, paginaAncho - 15, yEncabezado + 12);
+    
+      //AGREGANDO LA GRAFICA EN IMAGEEEEEEENNN
+      const imagenAncho = 140; 
+        const imagenAlto = 80; 
+        const xImagen = (paginaAncho - imagenAncho) / 2; 
+        const yImagen = yEncabezado + 20; 
+        
+      if (this.graficaImagenUrl) {
+        doc.addImage(this.graficaImagenUrl, 'PNG', xImagen, yImagen, imagenAncho, imagenAlto);
+        let inicioInformacionVentas = yImagen + imagenAlto + 10; 
+        paginaAncho = inicioInformacionVentas; 
+      
+      }
+  
+      let yPosition = yEncabezado + 20 + imagenAlto + 20; // Posición 'y' después de la gráfica y un margen de 10 mm
+     this.ventas.forEach((ventasS, index) => {
+      // Verificar si es necesario añadir una nueva página
+      if (yPosition > (doc.internal.pageSize.height - 25)) {
+        // No hay suficiente espacio, agrega una nueva página
+        doc.addPage();
+        yPosition = 25; // Restablece la posición Y para el inicio de la nueva página
+      }
+      doc.setFontSize(10);
+       // Encabezado de cada venta
+       //OBETENER LA FECHA EN YYYY-MM-DD
+        const fechaHoraISO = ventasS.fechaVenta.toString();
+        
+        // Ahora puedes usar split ya que fechaHoraISO es una cadena:
+        const partes = fechaHoraISO.split('T');
+        const fecha = partes[0];const horaCompleta = partes[1].split(':');
+        const hora = `${horaCompleta[0]}:${horaCompleta[1]}`; // Formato HH:MM
+  
+       doc.setFont("helvetica", "bold");  
+       doc.text(`Venta nº: ${index+1}     Fecha: ${fecha}     Hora: ${hora}`, 15, paginaAncho);
+      
+       // Calculando el ancho del texto "Total de Venta"
+       const totalVentaTexto = `Total de venta: $ ${ventasS.totalPagar}.00`;
+       const totalVentaAncho = doc.getTextWidth(totalVentaTexto);
+       
+       // Calculando la posición x para alinear a la derecha
+       const margenDerecho = 15; // Por ejemplo, 10 mm de margen derecho
+       const paginaAncho2 = doc.internal.pageSize.getWidth();
+       const xTotalVenta = paginaAncho2 - totalVentaAncho - margenDerecho;
+       
+       // Posicionando "T otal de Venta" a la derecha y al mismo nivel de "Venta ID"
+       
+       doc.setFont("helvetica", "bold");
+       doc.text(totalVentaTexto, xTotalVenta, paginaAncho);;
+        
+       //NOMBRE DEL EMPLEADO
+       paginaAncho += 6;
+       const nombreCompletoEmpleado = `${ventasS.empleado?.nombreEmpleado} ${ventasS.empleado?.apellidoPaterno} ${ventasS.empleado?.apellidoMaterno}`;
+       doc.setFont("helvetica", "normal");
+       doc.text(`Empleado: ${nombreCompletoEmpleado}`, 15, paginaAncho);
+  
+       //NOMBRE DEL CLIENTE
+       paginaAncho += 6; // Espacio después del encabezado de la venta
+       const nombreCompletoCliente = `${ventasS.cliente?.nombreCliente} ${ventasS.cliente?.apellidoPaterno} ${ventasS.cliente?.apellidoMaterno}`;
+       doc.setFont("helvetica", "normal");
+       doc.text(`Cliente: ${nombreCompletoCliente}`, 15, paginaAncho);
+  
+       paginaAncho += 6; // Espacio después del encabezado de la venta
+          
+        // Datos para la tabla de detalles
+        const detallesColumn = ["Clave","Producto", "Cantidad", "Precio", "Subtotal"];
+        const detallesRows = ventasS.detalles.map(detalle => [
+          detalle.producto?.clave || 'N/A', 
+          detalle.producto?.nombreProducto || 'N/A', // 'N/A' como valor por defecto
+          detalle.cantidadProductos || 0,
+          detalle.producto?.precio || 0,
+          detalle.subTotal || 0,
+        ]);
+  
+        // Añadir tabla de detalles al documento
+        autoTable(doc, {
+          head: [detallesColumn],
+          body: detallesRows,
+          startY: paginaAncho,
+          headStyles: {
+            fillColor: [25, 110, 167], // Color verde en formato RGB // Fuente
+            fontStyle: 'bold' // Estilo de fuente en negrita
+          },
+          bodyStyles: { // Fuente para el cuerpo de la tabla
+          },
+          didDrawPage: function(data) {
+            if (data.cursor) {
+              paginaAncho = data.cursor.y + 10; // Actualizar la posición Y después de dibujar la tabla
+            }
+          }
+        });
+  
+     });
+      
+      // Guardar el PDF ESCRITORIO
+      doc.save(`reporte_ventas_${this.selectedMonth.name}_${this.selectedWeek.name}.pdf`);
+     
+      //ABRIR EL PDF EN EL NAVEGADOR
+     
+    setTimeout(function() {
+      window.open(doc.output('bloburl'), '_blank');
+    }, 1000);
+
+  }
 }

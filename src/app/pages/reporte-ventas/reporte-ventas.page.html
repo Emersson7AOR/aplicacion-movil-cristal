@@ -33,7 +33,7 @@
             </ion-item>
           </ion-col>
           <ion-col class="alineando" size="auto">
-            <ion-button  shape="round">Generar Reporte</ion-button>
+            <ion-button (click)="generarReporteMensual()"  shape="round">Generar Reporte</ion-button>
           </ion-col>
         </ion-row>
         <ion-row class="ion-align-items-center ion-justify-content-center">
@@ -67,17 +67,15 @@
       <!-- Lista de ventas -->
       <ion-card class="cardVentas">
         <ion-list >
-          Ventas de la {{selectedWeek.week}}
+          Ventas de la {{selectedWeek.name}}
           <div style="max-height: 320px; overflow-y: auto;">
-
-            <ion-list *ngFor="let venta of ventas; let i = index" >
-
-              <ion-item >
+            <ion-card *ngFor="let venta of ventas; let i = index" (click)="selectVenta(venta)">
+              <ion-card-content >
                 <ion-label>
                       Venta #{{i+1}} Total: {{venta.totalPagar | currency}}
                 </ion-label>
-              </ion-item>
-            </ion-list>
+              </ion-card-content>
+            </ion-card>
           </div>
         </ion-list>
         <!-- Mensaje si no hay ventas -->

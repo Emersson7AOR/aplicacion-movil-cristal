@@ -5,7 +5,9 @@ const config: CapacitorConfig = {
   appName: 'progomex-app',
   webDir: 'www',
   server: {
-    androidScheme: 'http'
+    androidScheme: 'http',
+    "allowNavigation": ["blob:"]
+
   }
 };
 
