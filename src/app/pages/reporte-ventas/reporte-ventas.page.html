@@ -39,7 +39,7 @@
         <ion-row class="ion-align-items-center ion-justify-content-center">
           <div *ngIf="chartOptions && chartOptions.data && chartOptions.data.length > 0">
             <canvasjs-chart style="align-items: center;" id = "myChart"[options]="chartOptions" [styles]="{ width: '370px', height:'250px'}"></canvasjs-chart>
-          </div> 
+          </div>
         </ion-row>
       </ion-grid>
 
@@ -72,9 +72,9 @@
 
             <ion-list *ngFor="let venta of ventas; let i = index" >
 
-              <ion-item (click)="selectVenta(venta)">
+              <ion-item >
                 <ion-label>
-                      Venta #{{i+1}} Total: {{venta.totalPagar | currency}} 
+                      Venta #{{i+1}} Total: {{venta.totalPagar | currency}}
                 </ion-label>
               </ion-item>
             </ion-list>
@@ -89,14 +89,14 @@
             </ion-card-content>
           </ion-card>
 
-          
+
         </div>
       </ion-card>
-      
+
     </div>
-      
+
       </div>
-      
+
     </ion-card-content>
   </ion-card>
 

@@ -1,11 +1,19 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ModalController, ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
 import { DetalleProducto, Grafica, GraficaProductosService } from 'src/app/services/producto/grafica-productos.service';
 import { Venta, VentasService } from 'src/app/services/ventas/ventas.service';
 import { CanvasJSAngularChartsModule } from '@canvasjs/angular-charts';
 import { ModalDetallesPage } from '../modal-detalles/modal-detalles.page';
+import {
+  IonCard, IonCardHeader, IonCardContent,
+  IonCardSubtitle, IonCardTitle, IonToolbar,
+  IonHeader, IonContent, IonGrid, IonNote,
+  IonCol, IonRow, IonSelect, IonSelectOption,
+  IonIcon, IonItem, IonTitle, IonButton, IonList,
+  IonLabel,
+} from "@ionic/angular/standalone";
 
 
 interface Week {
@@ -24,12 +32,20 @@ interface Month {
   templateUrl: './reporte-ventas.page.html',
   styleUrls: ['./reporte-ventas.page.scss'],
   standalone: true,
-  imports: [IonicModule, CanvasJSAngularChartsModule,
-     CommonModule, FormsModule]
+  imports: [
+     CanvasJSAngularChartsModule,
+     CommonModule, FormsModule,IonCard,
+     IonCardHeader, IonCardContent,
+     IonCardSubtitle, IonCardTitle, IonToolbar,
+     IonHeader, IonContent, IonGrid, IonNote,
+     IonCol, IonRow, IonSelect, IonSelectOption,
+     IonIcon, IonItem, IonTitle, IonButton,
+     IonList, IonLabel,
+    ]
 })
 export class ReporteVentasPage implements OnInit {
 
-  chartOptions: any; 
+  chartOptions: any;
   ventas : Venta[] = [];
   ventasM: Venta[] = [];
   productos: Grafica[] = [];
@@ -41,8 +57,8 @@ export class ReporteVentasPage implements OnInit {
 
   private readonly graficaProductosService = inject(GraficaProductosService);
 
-  
-  constructor(private modalController: ModalController) {
+
+  constructor(/* private modalController: ModalController */) {
     const currentDate = new Date();
     this.selectedYear = currentDate.getFullYear(); // Establece el año actual como predeterminado
     this.generateYears();
@@ -66,14 +82,14 @@ export class ReporteVentasPage implements OnInit {
   selectedMonth: Month | any = null;
   selectedWeek: Week | any = null;
 
-  //GENERANDO LOS AÑOS HASTA EL ACTUAL POR MEDIO DE UN OBJETO DE TIPO DATE CON AYUDA DE LA FUNCION 
+  //GENERANDO LOS AÑOS HASTA EL ACTUAL POR MEDIO DE UN OBJETO DE TIPO DATE CON AYUDA DE LA FUNCION
    generateYears() {
     const currentYear = new Date().getFullYear();
     for (let year = 2010; year <= currentYear; year++) {
       this.years.push(year);
     }
   }
-  
+
   //GENERANDO LOS MESES SEGUN EL AÑO SELECCIONADO
   generateMonths() {
     this.months = []; // Limpiar los meses existentes antes de generar nuevos despues de generar el año
@@ -82,7 +98,7 @@ export class ReporteVentasPage implements OnInit {
     for (let month = 0; month < 12; month++) {
       const firstDay = new Date(year, month, 1);
       const lastDay = new Date(year, month + 1, 0);
-     
+
       const monthName = new Intl.DateTimeFormat('es', { month: 'long' }).format(firstDay);
       const capitalizedMonthName = monthName.charAt(0).toUpperCase() + monthName.slice(1).toLowerCase();
 
@@ -125,7 +141,7 @@ export class ReporteVentasPage implements OnInit {
   onYearChange(event: any) {
     this.selectedYear = event.value;
     this.generateMonths(); // Regenera los meses para el año seleccionado
-  
+
     // Si el año seleccionado es el año actual, selecciona automáticamente el mes actual
     if (this.selectedYear === new Date().getFullYear()) {
       this.selectCurrentMonth();
@@ -141,25 +157,25 @@ export class ReporteVentasPage implements OnInit {
    onMonthChange(event: any) {
     // Asumir el mes actual si no se provee un evento con valor por medio de un objeto de tipo date y la funcion getMonth
     const currentMonth = new Date().getMonth();
-  
+
     // Encuentra y selecciona el mes basado en el nombre del mes
     this.selectedMonth = this.months.find((month) => month.name === event.detail.value);
-   
+
     this.selectedWeek = null; // Limpiar la semana seleccionada al cambiar el mes
-  
+
     const year = this.selectedYear;
     const monthIndex = this.months.findIndex((month) => month.name === event.detail.value);
-  
+
     // Calcula la fecha de inicio y fin para el mes seleccionado
     const startDate = new Date(year, monthIndex, 1);
     const endDate = new Date(year, monthIndex + 1, 0);
-  
+
     // Formatea las fechas a cadena en formato "YYYY-MM-DD"
     const formattedStartDate = startDate.toISOString().split('T')[0];
     const formattedEndDate = endDate.toISOString().split('T')[0];
-  
+
     console.log(`StartDate: ${formattedStartDate}, EndDate: ${formattedEndDate}`);
-  
+
     // Llama al servicio usando las fechas calculadas
     this.graficaProductosService.getGraficaProductos(startDate, endDate).subscribe({
       next: (productos: Grafica[]) => {
@@ -173,7 +189,7 @@ export class ReporteVentasPage implements OnInit {
           }
           return 'No disponible'; // Puedes retornar un valor por defecto o manejarlo como prefieras
         });
-        
+
         const cantidad = productos.map(item => item.cantidadTotal);
         this.crearGrafica(producto, cantidad);
       },
@@ -181,7 +197,7 @@ export class ReporteVentasPage implements OnInit {
         console.error("Error al obtener las graficas de productos", error);
       }
     });
-  
+
      //SERVICIO PARA TRAER LAS VENTAS POR MES Y AÑO
      this.ventasService.getVentasPorFecha(startDate, endDate).subscribe({
       next: (ventasM: Venta[]) =>{
@@ -192,9 +208,9 @@ export class ReporteVentasPage implements OnInit {
         console.error("Error al obtener las ventas por mes")
       }
     });
-  
+
   }
-  
+
    //CONVERTIR LOS MESES A NUMERO PARA
    //convertir el mes a numero
    convertirMesANumero(nombreMes: string): number {
@@ -207,14 +223,14 @@ export class ReporteVentasPage implements OnInit {
    selectWeek(week: { name: string, startDate: string, endDate: string }) {
     console.log(week);
     this.selectedWeek = week;
-    
+
     // Aquí, convierte las cadenas de fecha a objetos Date
     const [startDay, startMonth, startYear] = week.startDate.split('/').map(Number);
     const [endDay, endMonth, endYear] = week.endDate.split('/').map(Number);
-    
+
     const startDate = new Date(startYear, startMonth - 1, startDay);
     const endDate = new Date(endYear, endMonth - 1, endDay);
-    
+
     // Llama al servicio pasando objetos Date
     this.ventasService.getVentasPorFecha(startDate, endDate).subscribe({
       next: (ventasS: Venta[]) => {
@@ -231,7 +247,7 @@ export class ReporteVentasPage implements OnInit {
     this.selectedYear = currentDate.getFullYear();
     const currentMonthIndex = currentDate.getMonth();
     this.selectedMonth = this.months[currentMonthIndex];
-  
+
     // Asegurarse de calcular las fechas correctamente aquí
     const startDate = new Date(this.selectedYear, currentMonthIndex, 1);
     const endDate = new Date(this.selectedYear, currentMonthIndex + 1, 0);
@@ -259,7 +275,7 @@ export class ReporteVentasPage implements OnInit {
           }
           return 'No disponible'; // Puedes retornar un valor por defecto o manejarlo como prefieras
         });
-        
+
         const cantidad = productos.map(item => item.cantidadTotal);
         this.crearGrafica(producto, cantidad);
       },
@@ -268,7 +284,7 @@ export class ReporteVentasPage implements OnInit {
       }
     });
   }
-  
+
   //POR CUALQUIER COSA QUE FALLE AL VOLVERLA A INICIAR, SE PUEDE CULPAR A ESTA FUNCION
   // Asegúrate de actualizar selectCurrentMonth para que no dependa de un evento
   selectCurrentMonth() {
@@ -282,22 +298,22 @@ export class ReporteVentasPage implements OnInit {
   }
 
    //PARA ABRIR MI MODAL DE LOS DETALLES
-   async selectVenta(venta : Venta){
-    const modal = await this.modalController.create({
-      component: ModalDetallesPage,
-      componentProps: {
-        venta: venta
-      }
-    });
-    return await modal.present();
-  }
+  //  async selectVenta(venta : Venta){
+  //   const modal = await this.modalController.create({
+  //     component: ModalDetallesPage,
+  //     componentProps: {
+  //       venta: venta
+  //     }
+  //   });
+  //   return await modal.present();
+  // }
 
   crearGrafica(productos: string[], cantidades: number[]) {
     let dataPoints = productos.map((producto, index) => ({
       label: producto,
       y: cantidades[index]
     }));
-  
+
     this.chartOptions = null;
     //AQUI ESTOY ESPERANDO PARA RENDERIZAR LA GRAFICA
     setTimeout(() => {
@@ -324,6 +340,6 @@ export class ReporteVentasPage implements OnInit {
           //aqui se convierte la grafica a base 64
       }, 3000);
     });
-  
+
     }
 }
