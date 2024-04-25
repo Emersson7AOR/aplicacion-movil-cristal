@@ -51,7 +51,7 @@ export interface VentaAgregar{
   providedIn: 'root'
 })
 export class VentasService {
-  private url : string = "http://localhost:8080/ventas"
+  private url : string = "http://192.168.8.14:8080/ventas"
   private readonly _http= inject(HttpClient);
 
   constructor() { }

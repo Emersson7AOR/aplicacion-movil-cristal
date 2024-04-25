@@ -7,7 +7,8 @@ import { Venta, VentasService } from 'src/app/services/ventas/ventas.service';
 //Para crear el pdf
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Browser } from '@capacitor/browser';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { FileOpener } from '@awesome-cordova-plugins/file-opener/ngx';
 
 import { CanvasJSAngularChartsModule } from '@canvasjs/angular-charts';
 import { ModalDetallesPage } from '../modal-detalles/modal-detalles.page';
@@ -48,7 +49,7 @@ interface Month {
      IonIcon, IonItem, IonTitle, IonButton,
      IonList, IonLabel, IonModal
     ],
-    providers: [ModalController] // Provee ModalController aquí
+    providers: [ModalController, FileOpener] // Provee ModalController aquí
 
 })
 export class ReporteVentasPage implements OnInit {
@@ -69,7 +70,8 @@ export class ReporteVentasPage implements OnInit {
 
   constructor(private modalCtrl: ModalController,
     //clase que nos ayuda a identificar el tipo de plataforma que es si movil o web, para descargar la imagen
-    private platform : Platform
+    private platform : Platform,
+    private fileOpener: FileOpener
   ) {
     const currentDate = new Date();
     this.selectedYear = currentDate.getFullYear(); // Establece el año actual como predeterminado
@@ -509,11 +511,27 @@ export class ReporteVentasPage implements OnInit {
     
       if (this.platform.is('capacitor')) { //si es movil
           // Generar el blob y la URL del blob
-        const pdfOutput = doc.output('blob');
-        const blobURL = URL.createObjectURL(pdfOutput);
-      
-        // Abrir el PDF usando el Browser de Capacitor
-        await Browser.open({ url: blobURL });
+            // Generar el blob del PDF
+  const pdfOutput = doc.output('blob');
+          const data = await new Response(pdfOutput).arrayBuffer();
+          const base64 = btoa(new Uint8Array(data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+        
+          // Guardar el archivo en el dispositivo
+          const fileName = `reporte_ventas_${this.selectedMonth.name}.pdf`;
+          const savedFile = await Filesystem.writeFile({
+            path: fileName,
+            data: base64,
+            directory: Directory.Documents,
+            recursive: true
+          });
+        
+          // Obtener la URI para el archivo guardado
+          const uri = savedFile.uri;
+        
+          // Abrir el archivo PDF con la aplicación nativa
+          this.fileOpener.open(uri, 'application/pdf')
+            .then(() => console.log('File is opened'))
+            .catch(err => console.error('Error opening file:', err));
       } else {//si es web
         // Guardar el PDF ESCRITORIO
         doc.save(`reporte_ventas_${this.selectedMonth.name}.pdf`);

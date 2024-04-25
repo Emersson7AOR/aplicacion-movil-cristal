@@ -26,7 +26,7 @@ export interface DetalleProducto {
 export class GraficaProductosService {
   
   private readonly _httpGrafica = inject(HttpClient);
-   private url : string = "http://localhost:8080/ventas";
+   private url : string = "http://192.168.8.14:8080/ventas";
 
   constructor() { }
 
