@@ -24,7 +24,7 @@ interface Month {
   templateUrl: './reporte-ventas.page.html',
   styleUrls: ['./reporte-ventas.page.scss'],
   standalone: true,
-  imports: [IonicModule, CanvasJSAngularChartsModule,
+  imports: [ IonicModule, CanvasJSAngularChartsModule,
      CommonModule, FormsModule]
 })
 export class ReporteVentasPage implements OnInit {
