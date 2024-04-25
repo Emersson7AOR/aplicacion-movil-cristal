@@ -1,25 +1,60 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Modal</ion-title>
+    <ion-title>Detalles de la venta</ion-title>
     <ion-buttons slot="start">
       <ion-button color="medium" (click)="cancel()">Cancel</ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content>          
   <ion-list>
-    <ion-list-header>
-      Detalles de la Venta
-    </ion-list-header>
-    <ion-item *ngFor="let detalle of venta?.detalles">
+
+    <ion-item lines="none">
       <ion-label>
-        <h2>{{ detalle.producto?.nombreProducto }}</h2>
-        <p>Cantidad: {{ detalle.cantidadProductos }}</p>
-        <p>Precio unitario: ${{ detalle.producto?.precio | number:'1.2-2' }}</p>
-        <p>Subtotal: ${{ detalle.subTotal | number:'1.2-2' }}</p>
+        Empleado: {{venta.empleado.nombreEmpleado}} {{venta.empleado.apellidoPaterno}} {{venta.empleado.apellidoMaterno}}
+      </ion-label><br>
+
+    </ion-item>
+    <ion-item lines="none">
+      <ion-label>
+        Cliente: {{venta.cliente.nombreCliente}} {{venta.cliente.apellidoPaterno}} {{venta.cliente.apellidoMaterno}}
       </ion-label>
     </ion-item>
+      
+    <ion-card>
+      <ion-list>
+        <ion-item>
+          <ion-grid>
+            <ion-row>
+              <ion-col class="negrita" size="4">Producto</ion-col>
+              <ion-col class="negrita" size="2">Cantidad</ion-col>
+              <ion-col class="negrita" size="2">Precio</ion-col>
+              <ion-col class="negrita" size="2">Subtotal</ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-item>
+        <ion-item *ngFor="let detalle of venta?.detalles">
+         
+          <ion-grid>
+            <ion-row>
+              <ion-col size="4">{{ detalle.producto?.nombreProducto }}</ion-col>
+              <ion-col size="2">{{ detalle.cantidadProductos }}</ion-col>
+              <ion-col size="2">{{detalle.producto?.precio | currency}}</ion-col>
+              <ion-col size="2">{{ detalle.subTotal | currency}}</ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-item>
+        <ion-item>
+          <ion-grid>
+            <ion-row>
+              <ion-col size="8">Total a pagar:</ion-col>
+              <ion-col size="2">{{ venta.totalPagar | currency}}</ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-item>
+      </ion-list>
+    </ion-card>
   </ion-list>
 </ion-content>
 

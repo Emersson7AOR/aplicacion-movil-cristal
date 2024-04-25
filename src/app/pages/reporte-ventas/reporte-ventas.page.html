@@ -1,6 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>reporte-ventas</ion-title>
+    <ion-title>Reporte ventas</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -20,7 +20,6 @@
         <ion-row class="ion-align-items-center ion-justify-content-center">
           <ion-col >
             <ion-item>
-              
               <ion-select label="Selecciona un año" label-placement="floating" placeholder="Selecciona un año" [value]="selectedYear" (ionChange)="onYearChange($event)">
                 <ion-select-option *ngFor="let year of years" [value]="year">{{year}}</ion-select-option>
               </ion-select>
@@ -39,7 +38,7 @@
         </ion-row>
         <ion-row class="ion-align-items-center ion-justify-content-center">
           <div *ngIf="chartOptions && chartOptions.data && chartOptions.data.length > 0">
-            <canvasjs-chart style="align-items: center;" id = "myChart"[options]="chartOptions" [styles]="{ width: '350px', height:'280px'}"></canvasjs-chart>
+            <canvasjs-chart style="align-items: center;" id = "myChart"[options]="chartOptions" [styles]="{ width: '370px', height:'250px'}"></canvasjs-chart>
           </div> 
         </ion-row>
       </ion-grid>
@@ -68,17 +67,18 @@
       <!-- Lista de ventas -->
       <ion-card class="cardVentas">
         <ion-list >
-          
-            
-            <ion-label>Ventas de la semana {{ selectedWeek.name }}</ion-label>
-          
-          <ion-list *ngFor="let venta of ventas; let i = index" (click)="selectVenta(venta)">
-            <ion-item>
-              <ion-label>
-                    Venta #{{i+1}} Total: {{venta.totalPagar | currency}}
-              </ion-label>
-            </ion-item>
-          </ion-list>
+          Ventas de la {{selectedWeek.week}}
+          <div style="max-height: 320px; overflow-y: auto;">
+
+            <ion-list *ngFor="let venta of ventas; let i = index" >
+
+              <ion-item (click)="selectVenta(venta)">
+                <ion-label>
+                      Venta #{{i+1}} Total: {{venta.totalPagar | currency}} 
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </div>
         </ion-list>
         <!-- Mensaje si no hay ventas -->
         <div *ngIf="ventas.length === 0">

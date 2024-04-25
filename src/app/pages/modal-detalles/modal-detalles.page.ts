@@ -14,12 +14,23 @@ import { Venta } from 'src/app/services/ventas/ventas.service';
 export class ModalDetallesPage implements OnInit {
   @Input() venta!: Venta; // Recibe la venta como input
 
-  constructor(private modalCtrl: ModalController) { }
+  constructor(private modalCtrl: ModalController) {
+
+   }
   
   cancel() {
     return this.modalCtrl.dismiss(null, 'cancel');
   }
   ngOnInit() {
   }
+
+  /*fechaHoraISO = this.venta.fechaVenta.toString();
+        
+  // Ahora puedes usar split ya que fechaHoraISO es una cadena:
+   partes = this.fechaHoraISO.split('T');
+  fecha = this.partes[0];
+  horaCompleta = this.partes[1].split(':');
+  hora = `${this.horaCompleta[0]}:${this.horaCompleta[1]}`; */
+
 
 }
