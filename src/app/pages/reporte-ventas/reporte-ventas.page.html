@@ -33,7 +33,14 @@
             </ion-item>
           </ion-col>
           <ion-col class="alineando" size="auto">
-            <ion-button (click)="generarReporteMensual()"  shape="round">Generar Reporte</ion-button>
+            <ion-button id="abrir-alert"  shape="round">Generar Reporte</ion-button>
+            <ion-alert
+            trigger="abrir-alert"
+            header="Generar reporte "
+            message="¿Estás seguro que deseas generar el reporte mensual?"
+            [buttons]="alertButtons"
+            (didDismiss)="setResult($event)"
+          ></ion-alert>
           </ion-col>
         </ion-row>
         <ion-row class="ion-align-items-center ion-justify-content-center">

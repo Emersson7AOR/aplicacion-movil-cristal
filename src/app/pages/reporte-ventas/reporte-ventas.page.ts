@@ -18,8 +18,7 @@ import {
   IonHeader, IonContent, IonGrid, IonNote,
   IonCol, IonRow, IonSelect, IonSelectOption,
   IonIcon, IonItem, IonTitle, IonButton, IonList,
-  IonLabel, IonModal
-} from "@ionic/angular/standalone";
+  IonLabel, IonModal, IonAlert } from "@ionic/angular/standalone";
 
 
 
@@ -39,7 +38,7 @@ interface Month {
   templateUrl: './reporte-ventas.page.html',
   styleUrls: ['./reporte-ventas.page.scss'],
   standalone: true,
-  imports: [
+  imports: [IonAlert, 
      CanvasJSAngularChartsModule,
      CommonModule, FormsModule,IonCard,
      IonCardHeader, IonCardContent,
@@ -512,7 +511,7 @@ export class ReporteVentasPage implements OnInit {
       if (this.platform.is('capacitor')) { //si es movil
           // Generar el blob y la URL del blob
             // Generar el blob del PDF
-  const pdfOutput = doc.output('blob');
+          const pdfOutput = doc.output('blob');
           const data = await new Response(pdfOutput).arrayBuffer();
           const base64 = btoa(new Uint8Array(data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
         
@@ -546,7 +545,7 @@ export class ReporteVentasPage implements OnInit {
   }
 
 //GENERAR REPORTE SEMANAL
-  generarReporteSemanal() {
+  async generarReporteSemanal() {
     const doc = new jsPDF();
     const margen = 15; 
     let paginaAncho = doc.internal.pageSize.getWidth();
@@ -683,14 +682,62 @@ export class ReporteVentasPage implements OnInit {
   
      });
       
+     if (this.platform.is('capacitor')) { //si es movil
+      // Generar el blob y la URL del blob
+        // Generar el blob del PDF
+      const pdfOutput = doc.output('blob');
+      const data = await new Response(pdfOutput).arrayBuffer();
+      const base64 = btoa(new Uint8Array(data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+    
+      // Guardar el archivo en el dispositivo
+      const fileName = `reporte_ventas_${this.selectedMonth.name}.pdf`;
+      const savedFile = await Filesystem.writeFile({
+        path: fileName,
+        data: base64,
+        directory: Directory.Documents,
+        recursive: true
+      });
+    
+      // Obtener la URI para el archivo guardado
+      const uri = savedFile.uri;
+    
+      // Abrir el archivo PDF con la aplicación nativa
+      this.fileOpener.open(uri, 'application/pdf')
+        .then(() => console.log('File is opened'))
+        .catch(err => console.error('Error opening file:', err));
+    } else {//si es web
       // Guardar el PDF ESCRITORIO
       doc.save(`reporte_ventas_${this.selectedMonth.name}_${this.selectedWeek.name}.pdf`);
-     
-      //ABRIR EL PDF EN EL NAVEGADOR
-     
-    setTimeout(function() {
-      window.open(doc.output('bloburl'), '_blank');
-    }, 1000);
+      //ABRIR EL PDF EN EL NAVEGADOR 
+      //lo estoy abriendo despues de un segundo para esperar a que se ejecute mi alert
+      setTimeout(function () {
+        window.open(doc.output('bloburl'), '_blank');
+      }, 1000);
+    }
+        
 
   }
+
+  public alertButtons = [
+    {
+      text: 'Generar',
+      role: 'cancel',
+      handler: () => {
+        this.generarReporteMensual();
+        console.log('Alert canceled');
+      },
+    },
+    {
+      text: 'Cancelar',
+      role: 'confirm',
+      handler: () => {
+        console.log('Alert confirmed');
+      },
+    },
+  ];
+
+  setResult(ev: any) {
+    console.log(`Dismissed with role: ${ev.detail.role}`);
+  }
+
 }
