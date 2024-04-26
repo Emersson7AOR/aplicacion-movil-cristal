@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ModalController, Platform } from '@ionic/angular';
+import {AlertController, ModalController, Platform } from '@ionic/angular';
 import { DetalleProducto, Grafica, GraficaProductosService } from 'src/app/services/producto/grafica-productos.service';
 import { Venta, VentasService } from 'src/app/services/ventas/ventas.service';
 //Para crear el pdf
@@ -20,7 +20,13 @@ import {
   IonIcon, IonItem, IonTitle, IonButton, IonList,
   IonLabel, IonModal, IonAlert } from "@ionic/angular/standalone";
 
+import { addIcons } from 'ionicons';
+import { downloadOutline, menuOutline } from 'ionicons/icons';
 
+addIcons({
+  'download-outline': downloadOutline,
+  'menu-outline': menuOutline
+});
 
 interface Week {
   name: string;
@@ -45,7 +51,7 @@ interface Month {
      IonCardSubtitle, IonCardTitle, IonToolbar,
      IonHeader, IonContent, IonGrid, IonNote,
      IonCol, IonRow, IonSelect, IonSelectOption,
-     IonIcon, IonItem, IonTitle, IonButton,
+     IonIcon, IonItem, IonTitle, IonButton, 
      IonList, IonLabel, IonModal
     ],
     providers: [ModalController, FileOpener] // Provee ModalController aquí
@@ -70,7 +76,9 @@ export class ReporteVentasPage implements OnInit {
   constructor(private modalCtrl: ModalController,
     //clase que nos ayuda a identificar el tipo de plataforma que es si movil o web, para descargar la imagen
     private platform : Platform,
-    private fileOpener: FileOpener
+    private fileOpener: FileOpener,
+    private alertCtrl: AlertController,
+
   ) {
     const currentDate = new Date();
     this.selectedYear = currentDate.getFullYear(); // Establece el año actual como predeterminado
@@ -335,7 +343,7 @@ export class ReporteVentasPage implements OnInit {
         title: {
           text: "Productos más vendidos",
           fontFamily: "Arial",
-          fontSize : 13
+          fontSize : 14
         },
         axisY: {
           title: "Unidades Vendidas",
@@ -717,8 +725,46 @@ export class ReporteVentasPage implements OnInit {
         
 
   }
+  alertGenerarReporteMensual(){
+    this.alertCtrl.create({
+      header: 'Generar Reporte',
+      message: '¿Estas seguro que deseas generar el reporte mensual?',
+      
+      buttons:[
+        {
+          text: 'Si',
+          handler:() =>    {
+            this.generarReporteMensual();
+          }
+        },
+        {
+          text: 'No'
+        }
+      ]
+    }).then(alertEl => alertEl.present());
+   
+  }
 
-  public alertButtons = [
+  alertGenerarReporteSemanal(){
+    this.alertCtrl.create({
+      header: 'Generar Reporte',
+      message: '¿Estas seguro que deseas generar el reporte semanal?',
+      buttons:[
+        {
+          text: 'Si',
+          handler:() =>    {
+            this.generarReporteSemanal();
+          }
+        },
+        {
+          text: 'No'
+        }
+      ]
+    }).then(alertEl => alertEl.present());
+   
+  }
+
+  public alertButtons1 = [
     {
       text: 'Generar',
       role: 'cancel',
@@ -736,7 +782,29 @@ export class ReporteVentasPage implements OnInit {
     },
   ];
 
+  public alertButtons2 = [
+    {
+      text: 'Generar',
+      role: 'cancel',
+      handler: () => {
+        this.generarReporteSemanal();
+        
+        console.log('Alert canceled');
+      },
+    },
+    {
+      text: 'Cancelar',
+      role: 'confirm',
+      handler: () => {
+        console.log('Alert confirmed');
+      },
+    },
+  ];
+
   setResult(ev: any) {
+    console.log(`Dismissed with role: ${ev.detail.role}`);
+  }
+  setResult2(ev: any) {
     console.log(`Dismissed with role: ${ev.detail.role}`);
   }
 

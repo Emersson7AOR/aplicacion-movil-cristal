@@ -11,10 +11,16 @@ ion-item{
 }
 ion-select{
     border-radius: 5%;
+    margin-left: 0;
+    margin-right: 0;
 }
 .alineando{
-    text-align: right;
-    margin-top: 20px; 
+   text-align: center;
+  }
+  h3{
+    font-size: 20px;
+    margin-left: 20px;
+    margin-right: 100px;
   }
 
   ancho-card {
@@ -28,10 +34,37 @@ ion-select{
 .split-screen {
     display: flex;
   }
-  
+  .ventas{
+    font-size: 15px;
+    margin-left: 12px;
+    color: black;
+    margin-bottom: 5px;
+  }
+  .color{
+    color: black;
+  }
   .left-panel, .right-panel {
     flex: 1; /* Hace que cada panel tome la mitad del espacio disponible */
     overflow-y: auto;
     
   }
- 
+ .select{
+  width: 170px;
+ }
+
+ .card{
+  padding: 10px;
+  color:black;
+ }
+
+ .padding{
+  padding: 0;
+ }
+
+ ion-icon{
+  font-size: 20px;
+ }
+ .title{
+  margin-top: 15px;
+  text-align: center;
+ }

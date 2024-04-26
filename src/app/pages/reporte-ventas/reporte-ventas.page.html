@@ -1,51 +1,42 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Reporte ventas</ion-title>
+<ion-header >
+  <ion-toolbar color="primary" >
+    <ion-icon name="menu-outline" slot="start" style="font-size: 30px; margin-left: 20px;"></ion-icon>
+    <ion-title slot="start">Progomex</ion-title>   
+     <img src="assets/progomexC.jpg" width="50px" height="50px" slot="end" style="margin-right: 20px;">
+
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">reporte-ventas</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  
 
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Reporte de ventas</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
+  <ion-title class="title">Reporte Ventas</ion-title>
       <ion-grid>
-        <ion-row class="ion-align-items-center ion-justify-content-center">
-          <ion-col >
-            <ion-item>
+        <ion-row >
+          <ion-col>
+            <ion-item  class="select" >
               <ion-select label="Selecciona un año" label-placement="floating" placeholder="Selecciona un año" [value]="selectedYear" (ionChange)="onYearChange($event)">
                 <ion-select-option *ngFor="let year of years" [value]="year">{{year}}</ion-select-option>
               </ion-select>
             </ion-item>
           </ion-col>
           <ion-col>
-            <ion-item>
+            <ion-item  class="select" >
               <ion-select label="Selecciona un mes" label-placement="floating" placeholder="Selecciona un mes" (ionChange)="onMonthChange($event)">
                 <ion-select-option *ngFor="let month of months" [value]="month.name">{{month.name}}</ion-select-option>
               </ion-select>
             </ion-item>
           </ion-col>
-          <ion-col class="alineando" size="auto">
-            <ion-button id="abrir-alert"  shape="round">Generar Reporte</ion-button>
-            <ion-alert
-            trigger="abrir-alert"
-            header="Generar reporte "
-            message="¿Estás seguro que deseas generar el reporte mensual?"
-            [buttons]="alertButtons"
-            (didDismiss)="setResult($event)"
-          ></ion-alert>
+          <ion-col class="alineando" >
+           
+            <ion-button (click)="alertGenerarReporteMensual()"  
+            shape="round" fill="outline">Generar Reporte mes: {{selectedMonth.name}}
+            <ion-icon name="download-outline" color="primary" slot="end"></ion-icon></ion-button>
           </ion-col>
         </ion-row>
         <ion-row class="ion-align-items-center ion-justify-content-center">
           <div *ngIf="chartOptions && chartOptions.data && chartOptions.data.length > 0">
-            <canvasjs-chart style="align-items: center;" id = "myChart"[options]="chartOptions" [styles]="{ width: '370px', height:'250px'}"></canvasjs-chart>
+            <canvasjs-chart style="align-items: center;" id = "myChart"[options]="chartOptions" [styles]="{ width: '370px', height:'230px'}"></canvasjs-chart>
           </div>
         </ion-row>
       </ion-grid>
@@ -53,7 +44,7 @@
       <div class="split-screen">
         <div class="left-panel">
           <ion-list *ngIf="selectedMonth">
-            <ion-card *ngFor="let week of selectedMonth.weeks" (click)="selectWeek(week)" >
+            <ion-card class="card" *ngFor="let week of selectedMonth.weeks" (click)="selectWeek(week)" >
               <ion-card-content>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <div>
@@ -61,7 +52,8 @@
                     <br>
                     <ion-note>Del {{ week.startDate }} al {{ week.endDate }}</ion-note>
                   </div>
-                  <ion-icon name="download" ></ion-icon>
+                  <ion-icon name="download-outline" (click)="alertGenerarReporteSemanal()"  color="primary" ></ion-icon>
+                  
                 </div>
               </ion-card-content>
             </ion-card>
@@ -72,13 +64,14 @@
        <!-- Contenedor para las ventas de la semana seleccionada -->
     <div class="right-panel" *ngIf="selectedWeek">
       <!-- Lista de ventas -->
-      <ion-card class="cardVentas">
+      <ion-card style="margin-top: 20px;">
         <ion-list >
-          Ventas de la {{selectedWeek.name}}
-          <div style="max-height: 320px; overflow-y: auto;">
+          <ion-label class="ventas"> Ventas de la {{selectedWeek.name}}
+          </ion-label>
+          <div  style="max-height: 450px; overflow-y: auto;">
             <ion-card *ngFor="let venta of ventas; let i = index" (click)="selectVenta(venta)">
               <ion-card-content >
-                <ion-label>
+                <ion-label class="color">
                       Venta #{{i+1}} Total: {{venta.totalPagar | currency}}
                 </ion-label>
               </ion-card-content>
@@ -89,7 +82,6 @@
         <div *ngIf="ventas.length === 0">
           <ion-card>
             <ion-card-content>
-              <p>Ventas de la  {{selectedWeek.name}}</p>
             <p>No hay ventas para mostrar en esta semana.</p>
             </ion-card-content>
           </ion-card>
@@ -101,9 +93,6 @@
     </div>
 
       </div>
-
-    </ion-card-content>
-  </ion-card>
 
 
 </ion-content>
