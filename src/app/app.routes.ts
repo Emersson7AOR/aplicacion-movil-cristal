@@ -7,7 +7,7 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'reporte-ventas',
+    redirectTo: 'reporte-ventas2',
     pathMatch: 'full',
   },
   {
@@ -18,5 +18,10 @@ export const routes: Routes = [
     path: 'modal-detalles',
     loadComponent: () => import('./pages/modal-detalles/modal-detalles.page').then( m => m.ModalDetallesPage)
   },
+  {
+    path: 'reporte-ventas2',
+    loadComponent: () => import('./pages/reporte-ventas2/reporte-ventas2.page').then( m => m.ReporteVentas2Page)
+  },
+
 
 ];

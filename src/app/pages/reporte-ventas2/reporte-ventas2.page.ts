@@ -2,7 +2,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {AlertController, ModalController, Platform } from '@ionic/angular';
-import { DetalleProducto, Grafica, GraficaProductosService } from 'src/app/services/producto/grafica-productos.service';
+import { DetalleProducto, Grafica, GraficaRubberService } from 'src/app/services/producto/grafica-rubber.service';
+
 import { Venta, VentasService } from 'src/app/services/ventas/ventas.service';
 //Para crear el pdf
 import jsPDF from 'jspdf';
@@ -40,24 +41,25 @@ interface Month {
 }
 
 @Component({
-  selector: 'app-reporte-ventas',
-  templateUrl: './reporte-ventas.page.html',
-  styleUrls: ['./reporte-ventas.page.scss'],
+  selector: 'app-reporte-ventas2',
+  templateUrl: './reporte-ventas2.page.html',
+  styleUrls: ['./reporte-ventas2.page.scss'],
   standalone: true,
   imports: [IonAlert, 
-     CanvasJSAngularChartsModule,
-     CommonModule, FormsModule,IonCard,
-     IonCardHeader, IonCardContent,
-     IonCardSubtitle, IonCardTitle, IonToolbar,
-     IonHeader, IonContent, IonGrid, IonNote,
-     IonCol, IonRow, IonSelect, IonSelectOption,
-     IonIcon, IonItem, IonTitle, IonButton, 
-     IonList, IonLabel, IonModal
-    ],
-    providers: [ModalController, FileOpener] // Provee ModalController aquí
+    CanvasJSAngularChartsModule,
+    CommonModule, FormsModule,IonCard,
+    IonCardHeader, IonCardContent,
+    IonCardSubtitle, IonCardTitle, IonToolbar,
+    IonHeader, IonContent, IonGrid, IonNote,
+    IonCol, IonRow, IonSelect, IonSelectOption,
+    IonIcon, IonItem, IonTitle, IonButton, 
+    IonList, IonLabel, IonModal
+   ],
+   providers: [ModalController, FileOpener] // Provee ModalController aquí
 
 })
-export class ReporteVentasPage implements OnInit {
+export class ReporteVentas2Page implements OnInit {
+
   private graficaImagenUrl: string | undefined;
 
   chartOptions: any;
@@ -70,7 +72,7 @@ export class ReporteVentasPage implements OnInit {
   private readonly ventasService = inject(VentasService);
   ventas$ = this.ventasService.getAllVentas();
 
-  private readonly graficaProductosService = inject(GraficaProductosService);
+  private readonly graficaProductosService = inject(GraficaRubberService);
 
 
   constructor(private modalCtrl: ModalController,
@@ -206,7 +208,7 @@ export class ReporteVentasPage implements OnInit {
           // Verifica si item.nombreProducto es un string válido antes de parsearlo
           if (item && item.nombreProducto) {
             const detalle: DetalleProducto = JSON.parse(item.nombreProducto);
-            return detalle.nombreProducto;
+            return detalle.clave; //este es el valor que van a tener las labels
           }
           return 'No disponible'; // Puedes retornar un valor por defecto o manejarlo como prefieras
         });
@@ -292,7 +294,7 @@ export class ReporteVentasPage implements OnInit {
           // Verifica si item.nombreProducto es un string válido antes de parsearlo
           if (item && item.nombreProducto) {
             const detalle: DetalleProducto = JSON.parse(item.nombreProducto);
-            return detalle.nombreProducto;
+            return detalle.clave;
           }
           return 'No disponible'; // Puedes retornar un valor por defecto o manejarlo como prefieras
         });
@@ -341,18 +343,18 @@ export class ReporteVentasPage implements OnInit {
       this.chartOptions = {
         animationEnabled: true,
         title: {
-          text: "Productos más vendidos",
+          text: "Destinos más frecuentados",
           fontFamily: "Arial",
           fontSize : 14
         },
         axisY: {
-          title: "Unidades Vendidas",
+          title: "Vueltas por destino",
           fontFamily: "Arial",
           fontSize : 8
         },
         data: [{
           type: "splineArea",
-          color: "rgba(54,158,173,.7)",
+          color: "rgba(247, 220, 111)",
           fontSize : 8,
           dataPoints: dataPoints
         }]
@@ -383,9 +385,9 @@ export class ReporteVentasPage implements OnInit {
     const margen = 15; // 2.5 cm en milímetros
     let paginaAncho = doc.internal.pageSize.getWidth();
   
-    const logoEmpresa = '/assets/progomex.jpg';
-    const logoAncho = 30; 
-    const logoAlto = 30; 
+    const logoEmpresa = '/assets/rubberL.jpeg';
+    const logoAncho = 35; 
+    const logoAlto = 15; 
   
     //AQUI ESTOY AÑADIENDO LA IMAGEN EN EL PDF A LA IZQUIERDA
     doc.addImage(logoEmpresa, 'JPEG', margen, 20, logoAncho, logoAlto); 
@@ -393,10 +395,10 @@ export class ReporteVentasPage implements OnInit {
     doc.setFont("helvetica", "bold");   
     doc.setFontSize(9); 
     const elementosEncabezado = [
-      "Productora y Maquila de Gomas Resinas de Mexico S. de R.L",
+      "Rubber Logistic, Empresa de distribución logistica.",
       "Carretera estatal la capilla el huasteco km.18 la Guadalupe Ver.",
-      "271-219-42-031",
-      "PMG110202LL5"
+      "789-456-23-98",
+      "RBL123DFG6789"
     ];
     
     let yEncabezado = 25; 
@@ -416,7 +418,7 @@ export class ReporteVentasPage implements OnInit {
       // propiedades para el título del reporte 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16); // Tamaño de fuente para el título
-      const titulo = `Reporte de ventas del mes de: ${this.selectedMonth.name}`;
+      const titulo = `Reporte de viajes del mes de: ${this.selectedMonth.name}`;
       const xTitulo = (paginaAncho - doc.getTextWidth(titulo)) / 2;
       doc.text(titulo, xTitulo, 61); // Para centrar el título en la página completa
       // línea después del título
@@ -438,7 +440,7 @@ export class ReporteVentasPage implements OnInit {
   
       let yPosition = yEncabezado + 20 + imagenAlto + 20; 
   
-     this.ventasM.forEach((ventaM, index) => {
+     
       // Verificar si es necesario añadir una nueva página
       if (yPosition > (doc.internal.pageSize.height - 25)) {
         // No hay suficiente espacio, entonces agrego una nueva página
@@ -448,53 +450,50 @@ export class ReporteVentasPage implements OnInit {
       doc.setFontSize(10);
        // Encabezado de cada venta
        //OBETENER LA FECHA EN YYYY-MM-DD
-        const fechaHoraISO = ventaM.fechaVenta.toString();
+        const fechaHoraISO = "2024-04-02";
         
-        // Ahora uso un split ya que fechaHoraISO es una cadena:
+        /* Ahora uso un split ya que fechaHoraISO es una cadena:
         const partes = fechaHoraISO.split('T');
-        const fecha = partes[0];const horaCompleta = partes[1].split(':');
-        const hora = `${horaCompleta[0]}:${horaCompleta[1]}`; // Formato HH:MM
+        const fecha = partes[0];const horaCompleta = partes[1].split(':');*/
+        const hora = "10 : 30 "; // Formato HH:MM
   
-       doc.setFont("helvetica", "bold");  
-       doc.text(`Venta nº: ${index+1}     Fecha: ${fecha}     Hora: ${hora}`, 15, paginaAncho);
+       doc.setFont("helvetica", "bold")  ;  
+       doc.text(`Viaje nº: 1    Fecha: ${fechaHoraISO}     Hora: ${hora}`, 15, paginaAncho);
       
        // Calculando el ancho del texto "Total de Venta"
-       const totalVentaTexto = `Total de venta: $ ${ventaM.totalPagar}.00`;
-       const totalVentaAncho = doc.getTextWidth(totalVentaTexto);
+       //const totalVentaTexto = `Total de venta: $ ${ventaM.totalPagar}.00`;
+       //const totalVentaAncho = doc.getTextWidth(totalVentaTexto);
        
        // Calculando la posición x para alinear a la derecha
        const margenDerecho = 15; // Por ejemplo, 10 mm de margen derecho
        const paginaAncho2 = doc.internal.pageSize.getWidth();
-       const xTotalVenta = paginaAncho2 - totalVentaAncho - margenDerecho;
+       //const xTotalVenta = paginaAncho2 - totalVentaAncho - margenDerecho;
        
-       // Posicionando "Total de Venta" a la derecha y al mismo nivel de "Venta ID"
+       /* Posicionando "Total de Venta" a la derecha y al mismo nivel de "Venta ID"
        
        doc.setFont("helvetica", "bold");
-       doc.text(totalVentaTexto, xTotalVenta, paginaAncho);;
+       doc.text(totalVentaTexto, xTotalVenta, paginaAncho);;*/
         
        //NOMBRE DEL EMPLEADO
        paginaAncho += 6;
-       const nombreCompletoEmpleado = `${ventaM.empleado?.nombreEmpleado} ${ventaM.empleado?.apellidoPaterno} ${ventaM.empleado?.apellidoMaterno}`;
+       const nombreCompletoEmpleado ="Emersson Rodrigo Alvarez Ordinola";
        doc.setFont("helvetica", "normal");
-       doc.text(`Empleado: ${nombreCompletoEmpleado}`, 15, paginaAncho);
+       doc.text(`Operador: ${nombreCompletoEmpleado}`, 15, paginaAncho);
   
        //NOMBRE DEL CLIENTE
        paginaAncho += 6; // Espacio despues del nombre del empleado
-       const nombreCompletoCliente = `${ventaM.cliente?.nombreCliente} ${ventaM.cliente?.apellidoPaterno} ${ventaM.cliente?.apellidoMaterno}`;
+       const nombreCompletoCliente = "Ernesto Salcedo Ordaz";
        doc.setFont("helvetica", "normal");
        doc.text(`Cliente: ${nombreCompletoCliente}`, 15, paginaAncho);
   
        paginaAncho += 6; // Espacio después del nombre del cliente
           
         // Datos para la tabla de detalles
-        const detallesColumn = ["Clave","Producto", "Cantidad", "Precio", "Subtotal"];
-        const detallesRows = ventaM.detalles.map(detalle => [
-          detalle.producto?.clave || 'N/A', 
-          detalle.producto?.nombreProducto || 'N/A', // 'N/A' como valor por defecto
-          detalle.cantidadProductos || 0,
-          detalle.producto?.precio || 0,
-          detalle.subTotal || 0,
-        ]);
+        const detallesColumn = ["Clave","Destino", "Kilometros", "Duración", "Observaciones"];
+        const detallesRows = [
+          ["BR-CU", "Bridgestone Cuernavaca", 150, "2 horas", "Sin incidencias"],
+          ["PP-VAZ", "Planta de prod. Villa Azueta", 300, "5 horas", "Retraso por tráfico"]
+        ];
   
         // Añadir tabla de detalles al documento
         autoTable(doc, {
@@ -502,7 +501,7 @@ export class ReporteVentasPage implements OnInit {
           body: detallesRows,
           startY: paginaAncho,
           headStyles: {
-            fillColor: [25, 110, 167], // Color verde en formato RGB 
+            fillColor: [255, 174, 0], // Color verde en formato RGB 
             fontStyle: 'bold' // Estilo de fuente en negrita
           },
           bodyStyles: { 
@@ -514,8 +513,147 @@ export class ReporteVentasPage implements OnInit {
           }
         });
   
-     });
+     ;
     
+     const fechaHoraISO2 = "2024-04-02";
+        const hora2 = "10 : 45 "; // Formato HH:MM
+  
+       doc.setFont("helvetica", "bold")  ;  
+       doc.text(`Viaje nº: 1    Fecha: ${fechaHoraISO2}     Hora: ${hora2}`, 15, paginaAncho);
+      
+       
+       //NOMBRE DEL EMPLEADO
+       paginaAncho += 6;
+       const nombreCompletoEmpleado2 ="Efrain Perez Dominguez";
+       doc.setFont("helvetica", "normal");
+       doc.text(`Operador: ${nombreCompletoEmpleado2}`, 15, paginaAncho);
+  
+       //NOMBRE DEL CLIENTE
+       paginaAncho += 6; // Espacio despues del nombre del empleado
+       const nombreCompletoCliente2 = "Esteban Pineda Arreola";
+       doc.setFont("helvetica", "normal");
+       doc.text(`Cliente: ${nombreCompletoCliente2}`, 15, paginaAncho);
+  
+       paginaAncho += 6; // Espacio después del nombre del cliente
+          
+        // Datos para la tabla de detalles
+        const detallesColumn2 = ["Clave","Destino", "Kilometros", "Duración", "Observaciones"];
+        const detallesRows2 = [
+          ["BR-CU", "Bridgestone Cuernavaca", 150, "2 horas", "Sin incidencias"],
+          ["PP-VAZ", "Planta de prod. Villa Azueta", 300, "5 horas", "Retraso por tráfico"],
+          ["PP-LC", "Planta de produccion Las Choapas", 200, "3 horas", "Desvío por construcción"],
+          ];
+  
+        // Añadir tabla de detalles al documento
+        autoTable(doc, {
+          head: [detallesColumn2],
+          body: detallesRows2,
+          startY: paginaAncho,
+          headStyles: {
+            fillColor: [255, 174, 0], // Color verde en formato RGB 
+            fontStyle: 'bold' // Estilo de fuente en negrita
+          },
+          bodyStyles: { 
+          },
+          didDrawPage: function(data) {
+            if (data.cursor) {
+              paginaAncho = data.cursor.y + 10; 
+            }
+          }
+        });
+  
+        const fechaHoraISO3 = "2024-05-02";
+        const hora3 = "11 : 37 "; // Formato HH:MM
+  
+       doc.setFont("helvetica", "bold")  ;  
+       doc.text(`Viaje nº: 1    Fecha: ${fechaHoraISO3}     Hora: ${hora3}`, 15, paginaAncho);
+      
+       
+       //NOMBRE DEL EMPLEADO
+       paginaAncho += 6;
+       const nombreCompletoEmpleado3 ="Efrain Perez Dominguez";
+       doc.setFont("helvetica", "normal");
+       doc.text(`Operador: ${nombreCompletoEmpleado3}`, 15, paginaAncho);
+  
+       //NOMBRE DEL CLIENTE
+       paginaAncho += 6; // Espacio despues del nombre del empleado
+       const nombreCompletoCliente3 = "Esteban Pineda Arreola";
+       doc.setFont("helvetica", "normal");
+       doc.text(`Cliente: ${nombreCompletoCliente3}`, 15, paginaAncho);
+  
+       paginaAncho += 6; // Espacio después del nombre del cliente
+          
+        // Datos para la tabla de detalles
+        const detallesColumn3 = ["Clave","Destino", "Kilometros", "Duración", "Observaciones"];
+        const detallesRows3 = [
+          ["IZ-TP", "Iztapalapa", 165, "4 horas", "Retraso por bloqueo en carretera federal"],
+          ["IS-JA", "Ingenio San José de Abajo", 203, "5 horas", "Retraso por incidente automovilístico"],
+        ];
+  
+        // Añadir tabla de detalles al documento
+        autoTable(doc, {
+          head: [detallesColumn3],
+          body: detallesRows3,
+          startY: paginaAncho,
+          headStyles: {
+            fillColor: [255, 174, 0], // Color verde en formato RGB 
+            fontStyle: 'bold' // Estilo de fuente en negrita
+          },
+          bodyStyles: { 
+          },
+          didDrawPage: function(data) {
+            if (data.cursor) {
+              paginaAncho = data.cursor.y + 10; 
+            }
+          }
+        });
+  
+        const fechaHoraISO4 = "2024-05-02";
+        const hora4 = "17 : 02 "; // Formato HH:MM
+  
+       doc.setFont("helvetica", "bold")  ;  
+       doc.text(`Viaje nº: 1    Fecha: ${fechaHoraISO4}     Hora: ${hora4}`, 15, paginaAncho);
+      
+       
+       //NOMBRE DEL EMPLEADO
+       paginaAncho += 6;
+       const nombreCompletoEmpleado4 ="Fernando Ortiz Luna";
+       doc.setFont("helvetica", "normal");
+       doc.text(`Operador: ${nombreCompletoEmpleado4}`, 15, paginaAncho);
+  
+       //NOMBRE DEL CLIENTE
+       paginaAncho += 6; // Espacio despues del nombre del empleado
+       const nombreCompletoCliente4 = "Arturo Estevez Martinez";
+       doc.setFont("helvetica", "normal");
+       doc.text(`Cliente: ${nombreCompletoCliente4}`, 15, paginaAncho);
+  
+       paginaAncho += 6; // Espacio después del nombre del cliente
+          
+        // Datos para la tabla de detalles
+        const detallesColumn4 = ["Clave","Destino", "Kilometros", "Duración", "Observaciones"];
+        const detallesRows4 = [
+          ["BR-CU", "Bridgestone Cuernavaca", 150, "2 horas", "Sin incidencias"],
+          ["PP-VAZ", "Planta de prod. Villa Azueta", 300, "5 horas", "Retraso por tráfico"]
+         ];
+  
+        // Añadir tabla de detalles al documento
+        autoTable(doc, {
+          head: [detallesColumn4],
+          body: detallesRows4,
+          startY: paginaAncho,
+          headStyles: {
+            fillColor: [255, 174, 0], // Color verde en formato RGB 
+            fontStyle: 'bold' // Estilo de fuente en negrita
+          },
+          bodyStyles: { 
+          },
+          didDrawPage: function(data) {
+            if (data.cursor) {
+              paginaAncho = data.cursor.y + 10; 
+            }
+          }
+        });
+  
       if (this.platform.is('capacitor')) { //si es movil
           // Generar el blob y la URL del blob
             // Generar el blob del PDF
@@ -763,5 +901,8 @@ export class ReporteVentasPage implements OnInit {
     }).then(alertEl => alertEl.present());
    
   }
+
+  
+
 
 }

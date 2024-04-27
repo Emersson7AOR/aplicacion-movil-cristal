@@ -1,0 +1,74 @@
+ion-card-header{
+    align-items: center;
+}
+
+ion-item{
+    margin-top: 10px;
+    margin-bottom: 0;
+    width: auto;
+    height: auto;
+  margin-left: 0;
+}
+ion-select{
+    border-radius: 5%;
+    margin-left: 0;
+    margin-right: 0;
+}
+.alineando{
+   text-align: center;
+  }
+  h3{
+    font-size: 20px;
+    margin-left: 20px;
+    margin-right: 100px;
+  }
+
+  ancho-card {
+    width: flex; /* Asegura que no exceda el ancho del contenedor */
+    height: flex;
+    position: -webkit-sticky; /* Para soporte en Safari */
+    position: sticky;
+    top: 0; /* Ajusta según sea necesario */
+    z-index: 1000; /* Asegura que la cabecera se muestre sobre otros contenidos */
+}
+.split-screen {
+    display: flex;
+  }
+  .ventas{
+    font-size: 15px;
+    margin-left: 12px;
+    color: black;
+    margin-bottom: 5px;
+  }
+  .color{
+    color: black;
+  }
+  .left-panel, .right-panel {
+    flex: 1; /* Hace que cada panel tome la mitad del espacio disponible */
+    overflow-y: auto;
+    
+  }
+ .select{
+  width: 170px;
+ }
+
+ .card{
+  padding: 10px;
+  color:black;
+ }
+
+ .padding{
+  padding: 0;
+ }
+
+ ion-icon{
+  font-size: 20px;
+ }
+ .title{
+  margin-top: 15px;
+  text-align: center;
+ }
+
+ .colorT{
+    background-color: rgb(218, 179, 70)
+ }

@@ -24,7 +24,7 @@ export interface Producto{
 }
 
 export interface Detalle{
-  subTotal: number;
+  subTotal: string;
   cantidadProductos: number;
   producto?:Producto;
 }
